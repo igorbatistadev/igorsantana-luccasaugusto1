@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "confeit@ri@123T",
+    "database": "confeitaria",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
