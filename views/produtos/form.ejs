@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<%- include('../partials/menu') %>
+
+<div>
+
+    <h1><%= produto.id ? 'Editar Produto' : 'Novo Produto' %></h1>
+
+    <form action="<%= action %>" method="post">
+    <label>Nome:</label><br>
+    <input type="text" name="nome" value="<%= produto.nome || '' %>" required><br><br>
+
+    <label>Descrição:</label><br>
+    <input type="text" name="descricao" value="<%= produto.descricao || '' %>" required><br><br>
+
+    <label>Preço (R$):</label><br>
+    <input type="text" id="precoInput" name="preco" value="<%= produto.preco || '' %>" required><br><br>
+
+    <button type="submit">Salvar</button>
+    </form>
+
+</div>
+
+<%- include('../partials/footer') %>

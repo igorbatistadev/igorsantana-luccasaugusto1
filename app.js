@@ -20,6 +20,32 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+app.get('/produtos/novo', (req, res) => {
+  res.render('produtos/form', { product: {}, action: '/produtos' });
+});
+
+app.post('/produtos', async (req, res) => {
+  try {
+    const { nome, descricao, preco } = req.body;
+
+    if (isNaN(preco)) {
+      return res.status(400).send('Preço inválido');
+    }
+
+    await Produto.create({
+      nome,
+      descricao,
+      preco: preco
+    });
+
+    res.redirect('/');
+
+  } catch (error) {
+    console.error('Erro ao criar produto:', error);
+    res.status(500).send('Erro ao criar produto');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
