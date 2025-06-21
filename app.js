@@ -9,6 +9,15 @@ const port = 3000;
 const sequelize = new Sequelize(config.database, config.username, config.password, config);
 const Produto = require('./models/produto')(sequelize, DataTypes);
 
+const Venda = require('./models/venda')(sequelize, DataTypes);
+const VendaItem = require('./models/vendaItem')(sequelize, DataTypes);
+
+Venda.hasMany(VendaItem, { foreignKey: 'idVenda' });
+VendaItem.belongsTo(Venda, { foreignKey: 'idVenda' });
+
+Produto.hasMany(VendaItem, { foreignKey: 'idProduto' });
+VendaItem.belongsTo(Produto, { foreignKey: 'idProduto' });
+
 sequelize.sync();
 
 app.set('view engine', 'ejs');
@@ -88,6 +97,53 @@ app.get('/produtos/deletar/:id', async (req, res) => {
   await produto.destroy();
   res.redirect('/produtos');
 });
+
+app.get('/vendas/nova', async (req, res) => {
+  const produtos = await Produto.findAll();
+  res.render('vendas/form', { produtos, formatCurrency });
+});
+
+app.post('/vendas', async (req, res) => {
+  let { produtos, quantidades } = req.body;
+
+  if (!Array.isArray(produtos)) {
+    produtos = [produtos];
+    quantidades = [quantidades];
+  }
+
+  const venda = await Venda.create();
+
+  for (let i = 0; i < produtos.length; i++) {
+    const quantidade = parseInt(quantidades[i], 10);
+    const produto = await Produto.findByPk(produtos[i]); 
+
+    if (quantidade > 0 && produto) {
+      await VendaItem.create({
+        idVenda: venda.id,
+        idProduto: produto.id,
+        quantidade: quantidade,
+        precoUnitario: produto.preco
+      });
+    }
+  }
+
+  res.redirect('/vendas');
+});
+
+app.get('/vendas', async (req, res) => {
+  const vendas = await Venda.findAll({
+    include: {
+      model: VendaItem,
+      include: Produto
+    }
+  });
+
+  res.render('vendas/lista', { vendas, formatCurrency });
+});
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+}
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);

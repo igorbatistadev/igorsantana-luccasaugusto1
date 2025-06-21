@@ -1,0 +1,111 @@
+<%- include('../partials/header') %>
+<%- include('../partials/menu') %>
+
+<div class="container form-wrapper">
+  <h1>Nova Venda</h1>
+
+  <form id="formVenda" action="/vendas" method="post">
+    <label>Produto:</label>
+    <select id="selectProduto">
+      <% produtos.forEach(produto => { %>
+        <option value="<%= produto.id %>" data-preco="<%= produto.preco %>">
+          <%= produto.nome %> - <%= formatCurrency(produto.preco) %>
+        </option>
+      <% }) %>
+    </select>
+
+    <label>Quantidade:</label>
+    <input type="number" id="inputQuantidade" min="1" step="1" value="1">
+
+    <button type="button" onclick="addProduto()">Adicionar Produto</button>
+
+    <h3>Produtos na Venda:</h3>
+    <table border="1" id="tabelaProdutos" style="width: 100%; margin-top: 10px;">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Preço Unitário</th>
+          <th>Quantidade</th>
+          <th>Total Item</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaProdutosBody">
+      </tbody>
+    </table>
+
+    <h3>Total da Venda: <span id="totalVendas">0,00</span></h3>
+
+    <!-- Campos ocultos para envio -->
+    <div id="hiddenFields"></div>
+
+    <button type="submit">Finalizar Venda</button>
+  </form>
+</div>
+
+<script>
+  const listaProdutos = [];
+  const tabelaProdutosBody = document.getElementById('tabelaProdutosBody');
+  const totalVendasElement = document.getElementById('totalVendas');
+  const hiddenFields = document.getElementById('hiddenFields');
+
+  function addProduto() {
+    const select = document.getElementById('selectProduto');
+    const idProduto = select.value;
+    const nomeProduto = select.options[select.selectedIndex].text.split(' - ')[0];
+    const precoUnitario = parseFloat(select.options[select.selectedIndex].dataset.preco);
+    const quantidade = parseInt(document.getElementById('inputQuantidade').value);
+
+    if (isNaN(quantidade) || quantidade < 1) {
+        alert('Por favor, insira uma quantidade válida (número inteiro maior que zero).');
+        return;
+    }
+
+    listaProdutos.push({ idProduto, nomeProduto, precoUnitario, quantidade });
+    renderTabelaProduto();
+    renderHiddenFields();
+  }
+
+  function renderTabelaProduto() {
+    tabelaProdutosBody.innerHTML = '';
+    let totalVendas = 0;
+
+    listaProdutos.forEach(item => {
+      const row = document.createElement('tr');
+      const totalItem = item.precoUnitario * item.quantidade;
+      totalVendas += totalItem;
+      console.log(item);
+      row.innerHTML = `
+        <td>${item.nomeProduto}</td>
+        <td>${formatCurrency(item.precoUnitario)}</td>
+        <td>${item.quantidade}</td>
+        <td>${formatCurrency(totalItem)}</td>
+      `;
+      tabelaProdutosBody.appendChild(row);
+    });
+
+    totalVendasElement.textContent = formatCurrency(totalVendas);
+  }
+
+  function renderHiddenFields() {
+    hiddenFields.innerHTML = '';
+    listaProdutos.forEach(item => {
+      const inputProduto = document.createElement('input');
+      inputProduto.type = 'hidden';
+      inputProduto.name = 'produtos';
+      inputProduto.value = item.idProduto;
+      hiddenFields.appendChild(inputProduto);
+
+      const inputQuantidade = document.createElement('input');
+      inputQuantidade.type = 'hidden';
+      inputQuantidade.name = 'quantidades';
+      inputQuantidade.value = item.quantidade;
+      hiddenFields.appendChild(inputQuantidade);
+    });
+  }
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  }
+</script>
+
+<%- include('../partials/footer') %>

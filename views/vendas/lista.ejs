@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+<%- include('../partials/menu') %>
+
+<div class="container">
+  <h1>Histórico de Vendas</h1>
+
+  <% vendas.forEach(venda => { 
+    let totalVenda = 0;
+  %>
+    <h3>Venda #<%= venda.id %> - <%= new Date(venda.dataVenda).toLocaleString('pt-BR') %></h3>
+    <table border="1" style="width: 100%;">
+      <tr>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Preço Unitário</th>
+        <th>Total Item</th>
+      </tr>
+      <% venda.VendaItems.forEach(item => {
+          const totalItem = item.quantidade * item.precoUnitario;
+          totalVenda += totalItem;
+      %>
+        <tr>
+          <td><%= item.Produto.nome %></td>
+          <td><%= item.quantidade %></td>
+          <td><%= formatCurrency(item.precoUnitario) %></td>
+          <td><%= formatCurrency(totalItem) %></td>
+        </tr>
+      <% }) %>
+    </table>
+    <p><strong>Total da Venda:</strong> <%= formatCurrency(totalVenda) %></p>
+    <hr>
+  <% }) %>
+</div>
+
+<%- include('../partials/footer') %>
