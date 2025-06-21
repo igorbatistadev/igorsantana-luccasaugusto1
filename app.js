@@ -50,6 +50,44 @@ app.get('/produtos', async (req, res) => {
   res.render('produtos/lista', { produtos });
 });
 
+app.get('/produtos/editar/:id', async (req, res) => {
+  const produto = await Produto.findByPk(req.params.id);
+  res.render('produtos/form', { produto, action: '/produtos/' + product.id });
+});
+
+app.post('/produtos/:id', async (req, res) => {
+  try {
+    const produto = await Produto.findByPk(req.params.id);
+
+    if (!produto) {
+      return res.status(404).send('Produto não encontrado');
+    }
+
+    const { nome, descricao, preco } = req.body;
+
+    if (isNaN(preco)) {
+      return res.status(400).send('Preço inválido');
+    }
+
+    await produto.update({
+      nome,
+      descricao,
+      preco
+    });
+
+    res.redirect('/produtos');
+
+  } catch (error) {
+    console.error('Erro ao atualizar produto:', error);
+    res.status(500).send('Erro ao atualizar produto');
+  }
+});
+
+app.get('/produtos/deletar/:id', async (req, res) => {
+  const produto = await Produto.findByPk(req.params.id);
+  await produto.destroy();
+  res.redirect('/produtos');
+});
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
