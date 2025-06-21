@@ -52,7 +52,7 @@ app.get('/produtos', async (req, res) => {
 
 app.get('/produtos/editar/:id', async (req, res) => {
   const produto = await Produto.findByPk(req.params.id);
-  res.render('produtos/form', { produto, action: '/produtos/' + product.id });
+  res.render('produtos/form', { produto, action: '/produtos/' + produto.id });
 });
 
 app.post('/produtos/:id', async (req, res) => {
